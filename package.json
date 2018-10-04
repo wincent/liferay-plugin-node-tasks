@@ -1,6 +1,6 @@
 {
   "name": "liferay-plugin-node-tasks",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "A set of base tasks for deploying plugins to Liferay Portal",
   "main": "index.js",
   "author": "Rob Frampton <rob.g.frampton@gmail.com> (https://github.com/Robert-Frampton)",

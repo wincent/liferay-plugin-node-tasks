@@ -14,22 +14,12 @@
     "node": ">=0.10.0"
   },
   "scripts": {
-    "test": "nyc ava"
+    "test": "ava"
   },
   "ava": {
     "files": [
       "test/index.js",
       "test/{lib,tasks}/**/*.js"
-    ]
-  },
-  "nyc": {
-    "include": [
-      "index.js",
-      "{lib,tasks}/**/*"
-    ],
-    "reporter": [
-      "lcov",
-      "text"
     ]
   },
   "xo": {
@@ -79,7 +69,6 @@
     "del": "^2.2.0",
     "fs-extra": "^0.26.7",
     "gogo-shell-helper": "^0.0.8",
-    "nyc": "^6.6.1",
     "sinon": "^1.17.3"
   }
 }

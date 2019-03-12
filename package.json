@@ -47,6 +47,7 @@
     "fs-extra": "^7.0.1",
     "gogo-shell-helper": "^0.0.8",
     "jest": "^24.5.0",
+    "natives": "1.1.6",
     "sinon": "^1.17.3"
   }
 }

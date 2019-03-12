@@ -22,31 +22,6 @@
       "test/{lib,tasks}/**/*.js"
     ]
   },
-  "xo": {
-    "rules": {
-      "brace-style": "off",
-      "import/order": [
-        "error",
-        {
-          "groups": [
-            [
-              "builtin",
-              "external"
-            ],
-            [
-              "internal",
-              "parent",
-              "sibling",
-              "index"
-            ]
-          ]
-        }
-      ],
-      "max-lines": "off",
-      "space-before-function-paren": "off",
-      "xo/filename-case": "off"
-    }
-  },
   "license": "MIT",
   "dependencies": {
     "async": "^2.0.0-rc.2",

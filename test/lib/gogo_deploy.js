@@ -4,14 +4,13 @@ var _ = require('lodash');
 var GogoShellHelper = require('gogo-shell-helper');
 var path = require('path');
 var sinon = require('sinon');
-var test = require('ava');
 
 var GogoDeployer = require('../../lib/gogo_deploy').GogoDeployer;
 
 var helper;
 var prototype;
 
-test.before(function() {
+beforeAll(function() {
 	helper = GogoShellHelper.start({
 		commands: [
 			{
@@ -24,38 +23,38 @@ test.before(function() {
 	});
 });
 
-test.cb.after(function(t) {
+afterAll(function(done) {
 	try {
-		helper.close(t.end);
+		helper.close(done);
 	}
 	catch (err) {
-		t.end();
+		done();
 	}
 });
 
-test.beforeEach(function() {
+beforeEach(function() {
 	prototype = _.create(GogoDeployer.prototype);
 });
 
-test('constructor should set connect config', function(t) {
+test('constructor should set connect config', function() {
 	var gogoDeployer = new GogoDeployer({
 		connectConfig: {
 			port: 1234
 		}
 	});
 
-	t.deepEqual(gogoDeployer.connectConfig, {
+	expect(gogoDeployer.connectConfig).toEqual({
 		port: 1234
 	});
 
-	t.true(!gogoDeployer.ready, 'is not ready yet');
+	expect(!gogoDeployer.ready).toBe(true);
 
 	gogoDeployer = new GogoDeployer();
 
-	t.true(!gogoDeployer.connectConfig, 'there is no connectConfig');
+	expect(!gogoDeployer.connectConfig).toBe(true);
 });
 
-test.cb('deploy should run sequence of commands', function(t) {
+test('deploy should run sequence of commands', function(done) {
 	var gogoDeployer = new GogoDeployer({
 		connectConfig: {
 			host: '0.0.0.0',
@@ -65,21 +64,21 @@ test.cb('deploy should run sequence of commands', function(t) {
 
 	gogoDeployer.deploy()
 		.then(function(data) {
-			t.true(data.indexOf('start 123') > -1);
+			expect(data.indexOf('start 123') > -1).toBe(true);
 
 			gogoDeployer.destroy();
 
-			t.end();
+			done();
 		});
 });
 
-test('_formatWebBundleURL should create web bundle install command', function(t) {
+test('_formatWebBundleURL should create web bundle install command', function() {
 	var webBundleURL = prototype._formatWebBundleURL('/some/path/to/file.war', 'context-path');
 
-	t.is(webBundleURL, 'webbundle:file:///some/path/to/file.war?Web-ContextPath=/context-path');
+	expect(webBundleURL).toBe('webbundle:file:///some/path/to/file.war?Web-ContextPath=/context-path');
 });
 
-test('_formatWebBundleURL should properly format windows path', function(t) {
+test('_formatWebBundleURL should properly format windows path', function() {
 	var sep = path.sep;
 
 	path.sep = '\\';
@@ -90,47 +89,51 @@ test('_formatWebBundleURL should properly format windows path', function(t) {
 
 	var webBundleURL = prototype._formatWebBundleURL('c:\\some\\path\\to\\file.war', 'context-path');
 
-	t.is(webBundleURL, 'webbundle:file:/c:/some/path/to/file.war?Web-ContextPath=/context-path');
+	expect(webBundleURL).toBe('webbundle:file:/c:/some/path/to/file.war?Web-ContextPath=/context-path');
 
 	path.sep = sep;
 });
 
-test('_formatWebBundleURL should escape whitespace', function(t) {
+test('_formatWebBundleURL should escape whitespace', function() {
 	var webBundleURL = prototype._formatWebBundleURL('/Users/person/path to/theme.war', 'context-path');
 
-	t.is(webBundleURL, 'webbundle:file:///Users/person/path%20to/theme.war?Web-ContextPath=/context-path');
+	expect(webBundleURL).toBe(
+        'webbundle:file:///Users/person/path%20to/theme.war?Web-ContextPath=/context-path'
+    );
 });
 
-test('_getWebBundleIdFromResponse should either return web bundle id from response data or return 0', function(t) {
+test('_getWebBundleIdFromResponse should either return web bundle id from response data or return 0', function() {
 	var webBundleId = prototype._getWebBundleIdFromResponse('Here is some data\n g!');
 
-	t.is(webBundleId, 0);
+	expect(webBundleId).toBe(0);
 
 	webBundleId = prototype._getWebBundleIdFromResponse('Bundle ID: 123 \n g!');
 
-	t.is(webBundleId, '123');
+	expect(webBundleId).toBe('123');
 
 	webBundleId = prototype._getWebBundleIdFromResponse('123\nBundle ID: 456 \n 123 g!');
 
-	t.is(webBundleId, '456');
+	expect(webBundleId).toBe('456');
 });
 
-test('_installWebBundle should call sendCommand with formatted install command string', function(t) {
+test('_installWebBundle should call sendCommand with formatted install command string', function() {
 	prototype.sendCommand = sinon.stub().returns('promise');
 
 	var promise = prototype._installWebBundle('/some/path/to/file.war', 'context-path');
 
-	t.is(promise, 'promise');
+	expect(promise).toBe('promise');
 
-	t.true(prototype.sendCommand.calledWith('install', 'webbundle:file:///some/path/to/file.war?Web-ContextPath=/context-path'));
+	expect(
+        prototype.sendCommand.calledWith('install', 'webbundle:file:///some/path/to/file.war?Web-ContextPath=/context-path')
+    ).toBe(true);
 });
 
-test('_startBundle should call sendCommand with bundle id arg', function(t) {
+test('_startBundle should call sendCommand with bundle id arg', function() {
 	prototype.sendCommand = sinon.stub().returns('promise');
 
 	var promise = prototype._startBundle('123');
 
-	t.is(promise, 'promise');
+	expect(promise).toBe('promise');
 
-	t.true(prototype.sendCommand.calledWith('start', '123'));
+	expect(prototype.sendCommand.calledWith('start', '123')).toBe(true);
 });

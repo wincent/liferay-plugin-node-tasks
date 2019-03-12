@@ -6,7 +6,6 @@ var fs = require('fs-extra');
 var Gulp = require('gulp').Gulp;
 var os = require('os');
 var path = require('path');
-var test = require('ava');
 
 var gulp = new Gulp();
 
@@ -20,7 +19,7 @@ var initCwd = process.cwd();
 var registerTasks;
 var runSequence;
 
-test.cb.before(function(t) {
+beforeAll(function(done) {
 	fs.copy(path.join(__dirname, '../fixtures/plugins/test-plugin-layouttpl'), tempPath, function(err) {
 		if (err) {
 			throw err;
@@ -36,40 +35,46 @@ test.cb.before(function(t) {
 
 		runSequence = require('run-sequence').use(gulp);
 
-		t.end();
+		done();
 	});
 });
 
-test.cb.after(function(t) {
+afterAll(function(done) {
 	del([path.join(tempPath, '**')], {
 		force: true
 	}).then(function() {
 		process.chdir(initCwd);
 
-		t.end();
+		done();
 	});
 });
 
-test.serial.cb('plugin:version should add package.json version to liferay-plugin-package.properties', function(t) {
-	runSequence('plugin:version', function() {
-		assert.fileContentMatch(path.join(tempPath, 'docroot/WEB-INF/liferay-plugin-package.properties'), /module-version=1\.2\.3/);
+test(
+    'plugin:version should add package.json version to liferay-plugin-package.properties',
+    function(done) {
+        runSequence('plugin:version', function() {
+            assert.fileContentMatch(path.join(tempPath, 'docroot/WEB-INF/liferay-plugin-package.properties'), /module-version=1\.2\.3/);
 
-		t.end();
-	});
-});
+            done();
+        });
+    }
+);
 
-test.serial.cb('plugin:version should add package.json version to liferay-plugin-package.properties', function(t) {
-	var pkgPath = path.join(tempPath, 'package.json');
+test(
+    'plugin:version should add package.json version to liferay-plugin-package.properties',
+    function(done) {
+        var pkgPath = path.join(tempPath, 'package.json');
 
-	var pkg = require(pkgPath);
+        var pkg = require(pkgPath);
 
-	pkg.version = '1.2.4';
+        pkg.version = '1.2.4';
 
-	fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, '\t'));
+        fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, '\t'));
 
-	runSequence('plugin:version', function() {
-		assert.fileContentMatch(path.join(tempPath, 'docroot/WEB-INF/liferay-plugin-package.properties'), /module-version=1\.2\.4/);
+        runSequence('plugin:version', function() {
+            assert.fileContentMatch(path.join(tempPath, 'docroot/WEB-INF/liferay-plugin-package.properties'), /module-version=1\.2\.4/);
 
-		t.end();
-	});
-});
+            done();
+        });
+    }
+);

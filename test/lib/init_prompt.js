@@ -4,7 +4,6 @@ var _ = require('lodash');
 var chai = require('chai');
 var path = require('path');
 var sinon = require('sinon');
-var test = require('ava');
 
 var initCwd = process.cwd();
 var InitPrompt;
@@ -19,21 +18,21 @@ function getDefaultAnswers() {
 	};
 }
 
-test.before(function() {
+beforeAll(function() {
 	process.chdir(path.join(__dirname, '../..'));
 
 	InitPrompt = require('../../lib/init_prompt');
 });
 
-test.after(function() {
+afterAll(function() {
 	process.chdir(initCwd);
 });
 
-test.beforeEach(function() {
+beforeEach(function() {
 	prototype = _.create(InitPrompt.prototype);
 });
 
-test('_afterPrompt should store normalized answers', function(t) {
+test('_afterPrompt should store normalized answers', function() {
 	prototype.store = {
 		store: sinon.spy()
 	};
@@ -46,80 +45,88 @@ test('_afterPrompt should store normalized answers', function(t) {
 
 	var storeArgs = prototype.store.store.args[0][0];
 
-	t.is(storeArgs.appServerPath, defaultAnswers.appServerPath, 'normalized answer equals what it was passed');
-	t.is(storeArgs.deployPath, defaultAnswers.deployPath, 'normalized answer equals what it was passed');
-	t.is(storeArgs.url, defaultAnswers.url, 'normalized answer equals what it was passed');
+	expect(storeArgs.appServerPath).toBe(defaultAnswers.appServerPath);
+	expect(storeArgs.deployPath).toBe(defaultAnswers.deployPath);
+	expect(storeArgs.url).toBe(defaultAnswers.url);
 
-	t.true(!_.isUndefined(storeArgs.appServerPathPlugin), 'appServerPathPlugin is defined');
-	t.true(!_.isUndefined(storeArgs.deployed), 'deployed is defined');
-	t.true(!_.isUndefined(storeArgs.pluginName), 'themeName is defined');
+	expect(!_.isUndefined(storeArgs.appServerPathPlugin)).toBe(true);
+	expect(!_.isUndefined(storeArgs.deployed)).toBe(true);
+	expect(!_.isUndefined(storeArgs.pluginName)).toBe(true);
 
-	t.is(prototype.done.callCount, 1, 'done is invoked after store');
+	expect(prototype.done.callCount).toBe(1);
 
 	prototype.done = null;
 
 	prototype._afterPrompt(defaultAnswers);
 });
 
-test.cb('_deployPathWhen should return false and add deployPath to answers', function(t) {
-	var defaultAnswers = getDefaultAnswers();
+test(
+    '_deployPathWhen should return false and add deployPath to answers',
+    function(done) {
+        var defaultAnswers = getDefaultAnswers();
 
-	var answers = {
-		appServerPath: defaultAnswers.appServerPath
-	};
+        var answers = {
+            appServerPath: defaultAnswers.appServerPath
+        };
 
-	prototype.async = function() {
-		return function(ask) {
-			t.is(answers.deployPath, defaultAnswers.deployPath, 'deployPath is correct');
-			t.true(!ask, 'ask is false');
+        prototype.async = function() {
+            return function(ask) {
+                expect(answers.deployPath).toBe(defaultAnswers.deployPath);
+                expect(!ask).toBe(true);
 
-			t.end();
-		}
-	};
+                done();
+            };
+        };
 
-	prototype._deployPathWhen(answers);
-});
+        prototype._deployPathWhen(answers);
+    }
+);
 
-test.cb('_deployPathWhen should return true when deploy path is not a sibling with provided appServerPath', function(t) {
-	var defaultAnswers = getDefaultAnswers();
+test(
+    '_deployPathWhen should return true when deploy path is not a sibling with provided appServerPath',
+    function(done) {
+        var defaultAnswers = getDefaultAnswers();
 
-	var answers = {
-		appServerPath: path.join(defaultAnswers.appServerPath, '..')
-	};
+        var answers = {
+            appServerPath: path.join(defaultAnswers.appServerPath, '..')
+        };
 
-	prototype.async = function() {
-		return function(ask) {
-			t.true(_.isUndefined(answers.deployPath), 'deployPath has not been set');
-			t.truthy(ask, 'ask is true');
+        prototype.async = function() {
+            return function(ask) {
+                expect(_.isUndefined(answers.deployPath)).toBe(true);
+                expect(ask).toBeTruthy();
 
-			t.end();
-		}
-	};
+                done();
+            };
+        };
 
-	prototype._deployPathWhen(answers);
-});
+        prototype._deployPathWhen(answers);
+    }
+);
 
-test('_getDefaultDeployPath should return defualy deploy path value based on answers', function(t) {
+test('_getDefaultDeployPath should return defualy deploy path value based on answers', function() {
 	var defaultPath = prototype._getDefaultDeployPath({
 		appServerPath: '/path-to/appserver/tomcat'
 	});
 
-	t.is(path.join('/path-to', 'appserver', 'deploy'), defaultPath);
+	expect(path.join('/path-to', 'appserver', 'deploy')).toBe(defaultPath);
 });
 
-test('_normalizeAnswers should normalize prompt answers', function(t) {
+test('_normalizeAnswers should normalize prompt answers', function() {
 	var defaultAnswers = getDefaultAnswers();
 	var answers = getDefaultAnswers();
 
 	prototype._normalizeAnswers(answers);
 
-	t.is(answers.appServerPath, defaultAnswers.appServerPath, 'normalized answer equals what it was passed');
-	t.is(answers.deployPath, defaultAnswers.deployPath, 'normalized answer equals what it was passed');
-	t.is(answers.url, defaultAnswers.url, 'normalized answer equals what it was passed');
+	expect(answers.appServerPath).toBe(defaultAnswers.appServerPath);
+	expect(answers.deployPath).toBe(defaultAnswers.deployPath);
+	expect(answers.url).toBe(defaultAnswers.url);
 
-	t.is(answers.pluginName, 'liferay-plugin-node-tasks', 'pluginName is root dir of plugin');
-	t.is(answers.deployed, false, 'deployed is set to false');
-	t.is(answers.appServerPathPlugin, path.join(defaultAnswers.appServerPath, 'webapps/liferay-plugin-node-tasks'));
+	expect(answers.pluginName).toBe('liferay-plugin-node-tasks');
+	expect(answers.deployed).toBe(false);
+	expect(answers.appServerPathPlugin).toBe(
+        path.join(defaultAnswers.appServerPath, 'webapps/liferay-plugin-node-tasks')
+    );
 
 	answers = _.assign({}, defaultAnswers);
 
@@ -127,10 +134,12 @@ test('_normalizeAnswers should normalize prompt answers', function(t) {
 
 	prototype._normalizeAnswers(answers);
 
-	t.is(answers.appServerPathPlugin, path.join(defaultAnswers.appServerPath, 'webapps/liferay-plugin-node-tasks'));
+	expect(answers.appServerPathPlugin).toBe(
+        path.join(defaultAnswers.appServerPath, 'webapps/liferay-plugin-node-tasks')
+    );
 });
 
-test('_prompt should invoke inquirer.prompt with correct args', function(t) {
+test('_prompt should invoke inquirer.prompt with correct args', function() {
 	var inquirer = require('inquirer');
 
 	var prompt = inquirer.prompt;
@@ -142,46 +151,46 @@ test('_prompt should invoke inquirer.prompt with correct args', function(t) {
 	var args = inquirer.prompt.args[0];
 
 	_.forEach(args[0], function(item, index) {
-		t.true(_.isObject(item), 'question is object');
+		expect(_.isObject(item)).toBe(true);
 	});
 
-	t.true(_.isFunction(args[1]), 'second argument is a callback function');
+	expect(_.isFunction(args[1])).toBe(true);
 
 	inquirer.prompt = prompt;
 });
 
-test('_validateAppServerPath should properly validate path and return appropriate messages if invalid', function(t) {
+test('_validateAppServerPath should properly validate path and return appropriate messages if invalid', function() {
 	var defaultAnswers = getDefaultAnswers();
 
 	var retVal = prototype._validateAppServerPath();
 
-	t.true(!retVal, 'retVal is false');
+	expect(!retVal).toBe(true);
 
 	retVal = prototype._validateAppServerPath('/fake/path');
 
-	t.is(retVal, '"/fake/path" does not exist', 'error message');
+	expect(retVal).toBe('"/fake/path" does not exist');
 
 	retVal = prototype._validateAppServerPath(path.join(__dirname, 'init_prompt.js'));
 
-	t.true(/is not a directory/.test(retVal));
+	expect(/is not a directory/.test(retVal)).toBe(true);
 
 	retVal = prototype._validateAppServerPath(path.join(defaultAnswers.appServerPath, '..'));
 
-	t.true(/doesn't appear to be an app server directory/.test(retVal));
+	expect(/doesn't appear to be an app server directory/.test(retVal)).toBe(true);
 
 	retVal = prototype._validateAppServerPath(path.join(__dirname, '../fixtures/server/glassfish'));
 
-	t.true(retVal, 'glassfish path is valid');
+	expect(retVal).toBe(true);
 
 	retVal = prototype._validateAppServerPath(path.join(__dirname, '../fixtures/server/jboss'));
 
-	t.true(retVal, 'jboss path is valid');
+	expect(retVal).toBe(true);
 
 	retVal = prototype._validateAppServerPath(path.join(__dirname, '../fixtures/server/tomcat'));
 
-	t.true(retVal, 'tomcat path is valid');
+	expect(retVal).toBe(true);
 
 	retVal = prototype._validateAppServerPath(path.join(__dirname, '../fixtures/server/wildfly'));
 
-	t.true(retVal, 'wildfly path is valid');
+	expect(retVal).toBe(true);
 });

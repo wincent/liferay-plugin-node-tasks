@@ -6,7 +6,6 @@ var fs = require('fs-extra');
 var Gulp = require('gulp').Gulp;
 var os = require('os');
 var path = require('path');
-var test = require('ava');
 
 var gulp = new Gulp();
 
@@ -20,7 +19,7 @@ var initCwd = process.cwd();
 var registerTasks;
 var runSequence;
 
-test.cb.before(function(t) {
+beforeAll(function(done) {
 	fs.copy(path.join(__dirname, '../fixtures/plugins/test-plugin-layouttpl'), tempPath, function(err) {
 		if (err) {
 			throw err;
@@ -36,42 +35,45 @@ test.cb.before(function(t) {
 
 		runSequence = require('run-sequence').use(gulp);
 
-		t.end();
+		done();
 	});
 });
 
-test.cb.after(function(t) {
+afterAll(function(done) {
 	del([path.join(tempPath, '**')], {
 		force: true
 	}).then(function() {
 		process.chdir(initCwd);
 
-		t.end();
+		done();
 	});
 });
 
-test.cb('plugin:war should build war file', function(t) {
+test('plugin:war should build war file', function(done) {
 	runSequence('plugin:war', function() {
 		assert.isFile(path.join(tempPath, 'dist', 'test-plugin-layouttpl.war'));
 
-		t.end();
+		done();
 	});
 });
 
-test.cb('plugin:war should use name for war file and pathDist for alternative dist location', function(t) {
-	gulp = new Gulp();
+test(
+    'plugin:war should use name for war file and pathDist for alternative dist location',
+    function(done) {
+        gulp = new Gulp();
 
-	registerTasks({
-		distName: 'my-plugin-name',
-		gulp: gulp,
-		pathDist: 'dist_alternative'
-	});
+        registerTasks({
+            distName: 'my-plugin-name',
+            gulp: gulp,
+            pathDist: 'dist_alternative'
+        });
 
-	runSequence = require('run-sequence').use(gulp);
+        runSequence = require('run-sequence').use(gulp);
 
-	runSequence('plugin:war', function() {
-		assert.isFile(path.join(tempPath, 'dist_alternative', 'my-plugin-name.war'));
+        runSequence('plugin:war', function() {
+            assert.isFile(path.join(tempPath, 'dist_alternative', 'my-plugin-name.war'));
 
-		t.end();
-	});
-});
+            done();
+        });
+    }
+);

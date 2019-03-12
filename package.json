@@ -21,8 +21,8 @@
       "/fixtures/",
       "/node_modules/"
     ],
-    "testMatch": [
-      "/test/**/*.js"
+    "testRegex": [
+      "/test/.*\\.js"
     ]
   },
   "license": "MIT",

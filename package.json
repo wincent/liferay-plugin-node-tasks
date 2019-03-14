@@ -14,48 +14,16 @@
     "node": ">=0.10.0"
   },
   "scripts": {
-    "test": "nyc ava"
+    "test": "jest"
   },
-  "ava": {
-    "files": [
-      "test/index.js",
-      "test/{lib,tasks}/**/*.js"
-    ]
-  },
-  "nyc": {
-    "include": [
-      "index.js",
-      "{lib,tasks}/**/*"
+  "jest": {
+    "testPathIgnorePatterns": [
+      "/fixtures/",
+      "/node_modules/"
     ],
-    "reporter": [
-      "lcov",
-      "text"
+    "testRegex": [
+      "/test/.*\\.js"
     ]
-  },
-  "xo": {
-    "rules": {
-      "brace-style": "off",
-      "import/order": [
-        "error",
-        {
-          "groups": [
-            [
-              "builtin",
-              "external"
-            ],
-            [
-              "internal",
-              "parent",
-              "sibling",
-              "index"
-            ]
-          ]
-        }
-      ],
-      "max-lines": "off",
-      "space-before-function-paren": "off",
-      "xo/filename-case": "off"
-    }
   },
   "license": "MIT",
   "dependencies": {
@@ -73,13 +41,13 @@
     "run-sequence": "^1.1.5"
   },
   "devDependencies": {
-    "ava": "^0.15.2",
     "chai": "^1.10.0",
     "chai-fs": "^0.1.0",
     "del": "^2.2.0",
-    "fs-extra": "^0.26.7",
+    "fs-extra": "^7.0.1",
     "gogo-shell-helper": "^0.0.8",
-    "nyc": "^6.6.1",
+    "jest": "^24.5.0",
+    "natives": "1.1.6",
     "sinon": "^1.17.3"
   }
 }

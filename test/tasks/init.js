@@ -7,7 +7,6 @@ var Gulp = require('gulp').Gulp;
 var os = require('os');
 var path = require('path');
 var sinon = require('sinon');
-var test = require('ava');
 
 var gulp = new Gulp();
 
@@ -17,7 +16,7 @@ var initCwd = process.cwd();
 var registerTasks;
 var runSequence;
 
-test.cb.before(function(t) {
+beforeAll(function(done) {
 	fs.copy(path.join(__dirname, '../fixtures/plugins/test-plugin-layouttpl'), tempPath, function(err) {
 		if (err) {
 			throw err;
@@ -33,21 +32,21 @@ test.cb.before(function(t) {
 
 		runSequence = require('run-sequence').use(gulp);
 
-		t.end();
+		done();
 	});
 });
 
-test.cb.after(function(t) {
+afterAll(function(done) {
 	del([path.join(tempPath, '**')], {
 		force: true
 	}).then(function() {
 		process.chdir(initCwd);
 
-		t.end();
+		done();
 	});
 });
 
-test('plugin:init should prompt user for appserver information', function(t) {
+test('plugin:init should prompt user for appserver information', function() {
 	var InitPrompt = require('../../lib/init_prompt');
 
 	var _prompt = InitPrompt.prototype._prompt;
@@ -56,12 +55,12 @@ test('plugin:init should prompt user for appserver information', function(t) {
 
 	runSequence('plugin:init', _.noop);
 
-	t.true(InitPrompt.prototype._prompt.calledOnce, '_prompt was invoked');
+	expect(InitPrompt.prototype._prompt.calledOnce).toBe(true);
 
 	var args = InitPrompt.prototype._prompt.getCall(0).args;
 
-	t.deepEqual(args[0].store, gulp.storage);
-	t.true(_.endsWith(args[0].appServerPathDefault, 'tomcat'), 'it adds tomcat to default path');
+	expect(args[0].store).toEqual(gulp.storage);
+	expect(_.endsWith(args[0].appServerPathDefault, 'tomcat')).toBe(true);
 
 	InitPrompt.prototype._prompt = _prompt;
 });

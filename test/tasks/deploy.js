@@ -8,7 +8,6 @@ var Gulp = require('gulp').Gulp;
 var os = require('os');
 var path = require('path');
 var sinon = require('sinon');
-var test = require('ava');
 
 var gulp = new Gulp();
 
@@ -25,7 +24,7 @@ var initCwd = process.cwd();
 var registerTasks;
 var runSequence;
 
-test.cb.before(function(t) {
+beforeAll(function(done) {
 	fs.copy(path.join(__dirname, '../fixtures/plugins/test-plugin-layouttpl'), tempPath, function(err) {
 		if (err) {
 			throw err;
@@ -64,43 +63,49 @@ test.cb.before(function(t) {
 			]
 		});
 
-		t.end();
+		done();
 	});
 });
 
-test.cb.after(function(t) {
+afterAll(function(done) {
 	del([path.join(tempPath, '**')], {
 		force: true
 	}).then(function() {
 		process.chdir(initCwd);
 
-		t.end();
+		done();
 	});
 });
 
-test.afterEach(function() {
+afterEach(function() {
 	del.sync(path.join(deployPath, '**'), {
 		force: true
 	});
 });
 
-test.cb.serial('deploy task should deploy war file to specified appserver', function(t) {
-	runSequence('deploy', function() {
-		assert.isFile(path.join(deployPath, 'test-plugin-layouttpl.war'));
+test(
+    'deploy task should deploy war file to specified appserver',
+    function(done) {
+        runSequence('deploy', function() {
+            assert.isFile(path.join(deployPath, 'test-plugin-layouttpl.war'));
 
-		t.true(gulp.storage.get('deployed'), 'deployed is set to true');
+            expect(gulp.storage.get('deployed')).toBe(true);
 
-		t.end();
-	});
-});
+            done();
+        });
+    }
+);
 
-test.cb.serial('plugin:deploy-gogo should attempt to deploy via gogo shell', function(t) {
-	runSequence('deploy:gogo', function() {
-		t.end();
-	});
-});
+test(
+    'plugin:deploy-gogo should attempt to deploy via gogo shell',
+    function(done) {
+        runSequence('deploy:gogo', function() {
+            done();
+        });
+    }
+);
 
-test.cb.serial('plugin:deploy-gogo should log error', function(t) {
+test('plugin:deploy-gogo should log error', function(done) {
 	helper.setCommands([
 		{
 			command: 'install webbundle'
@@ -117,28 +122,31 @@ test.cb.serial('plugin:deploy-gogo should log error', function(t) {
 	gutil.log = sinon.spy();
 
 	runSequence('deploy:gogo', function() {
-		t.true(gutil.log.getCall(0).args[0].indexOf('Something went wrong') > -1);
+		expect(gutil.log.getCall(0).args[0].indexOf('Something went wrong') > -1).toBe(true);
 
 		gutil.log = log;
 
-		t.end();
+		done();
 	});
 });
 
-test.cb.serial('plugin:deploy-gogo should log error due to disconnection', function(t) {
-	helper.close(function() {
-		var gutil = require('gulp-util');
+test(
+    'plugin:deploy-gogo should log error due to disconnection',
+    function(done) {
+        helper.close(function() {
+            var gutil = require('gulp-util');
 
-		var log = gutil.log;
+            var log = gutil.log;
 
-		gutil.log = sinon.spy();
+            gutil.log = sinon.spy();
 
-		runSequence('plugin:war', 'plugin:deploy-gogo', function() {
-			t.true(gutil.log.getCall(0).args[0].indexOf('ECONNREFUSED') > -1);
+            runSequence('plugin:war', 'plugin:deploy-gogo', function() {
+                expect(gutil.log.getCall(0).args[0].indexOf('ECONNREFUSED') > -1).toBe(true);
 
-			gutil.log = log;
+                gutil.log = log;
 
-			t.end();
-		});
-	});
-});
+                done();
+            });
+        });
+    }
+);

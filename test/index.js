@@ -34,10 +34,6 @@ beforeAll(function(done) {
 
 		registerTasks({
 			gulp: gulp,
-			gogoShellConfig: {
-				host: '0.0.0.0',
-				port: 1337
-			}
 		});
 
 		runSequence = require('run-sequence').use(gulp);
@@ -76,9 +72,6 @@ test('registerTasks should invoke extension functions', function(done) {
 			argv: require('minimist')(process.argv.slice(2)),
 			distName: 'test-plugin-layouttpl',
 			extensions: [extFunction],
-			gogoShellConfig: {
-				port: 11311
-			},
 			gulp: gulp,
 			pathDist: 'dist',
 			rootDir: 'docroot',
